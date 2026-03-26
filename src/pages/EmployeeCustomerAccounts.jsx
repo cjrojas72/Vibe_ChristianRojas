@@ -1,15 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockApi } from '../api/mockApi';
+import { getUserAccounts, getUser } from '../api/service';
 import AccountTable from '../components/AccountTable';
 
 export default function EmployeeCustomerAccounts() {
   const { customerId } = useParams();
   const [accounts, setAccounts] = useState([]);
+  const [customer, setCustomer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    mockApi.getAccounts(customerId).then(setAccounts);
+    setLoading(true);
+    setError('');
+    Promise.all([
+      getUser(customerId),
+      getUserAccounts(customerId)
+    ])
+      .then(([user, accs]) => {
+        setCustomer(user);
+        setAccounts(accs);
+      })
+      .catch(e => setError(e.message || 'Failed to load customer accounts'))
+      .finally(() => setLoading(false));
   }, [customerId]);
 
   return (
@@ -22,8 +36,11 @@ export default function EmployeeCustomerAccounts() {
           <svg className="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" /></svg>
           Back
         </button>
-        <h2 className="text-2xl font-bold text-blue-900 mb-4">Customer Accounts</h2>
-        <AccountTable accounts={accounts} />
+        <h2 className="text-2xl font-bold text-blue-900 mb-2">Customer Accounts</h2>
+        {customer && <div className="mb-4 text-lg text-gray-700">{customer.name} ({customer.email})</div>}
+        {loading && <div className="text-gray-500">Loading...</div>}
+        {error && <div className="text-red-600 mb-2">{error}</div>}
+        {!loading && !error && <AccountTable accounts={accounts} />}
       </div>
     </div>
   );

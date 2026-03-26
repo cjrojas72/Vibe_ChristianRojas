@@ -18,22 +18,24 @@ const ChevronRight = () => (
 );
 
 export default function AccountCard({ account, onClick }) {
+  const isChecking = account.accountType?.toLowerCase() === 'checking';
+  const last4 = String(account.accountId).slice(-4);
   return (
     <div
       className="py-3.5 flex items-center gap-4 group cursor-pointer transition duration-150 divide-y-0"
       onClick={onClick}
     >
-      <div className={`flex-shrink-0 p-3 rounded-full bg-gray-100 text-gray-500 group-hover:bg-${account.type === 'Checking' ? 'blue' : 'green'}-100 group-hover:text-${account.type === 'Checking' ? 'apex-primary' : 'emerald-700'} transition duration-150`}>
-        {account.type === 'Checking' ? <CheckingIcon /> : <SavingsIcon />}
+      <div className={`flex-shrink-0 p-3 rounded-full bg-gray-100 text-gray-500 group-hover:bg-${isChecking ? 'blue' : 'green'}-100 group-hover:text-${isChecking ? 'apex-primary' : 'emerald-700'} transition duration-150`}>
+        {isChecking ? <CheckingIcon /> : <SavingsIcon />}
       </div>
       <div className="flex-grow flex items-center justify-between">
         <div>
-          <div className={`text-base font-semibold ${account.type === 'Checking' ? 'text-apex-secondary group-hover:text-apex-primary' : 'text-apex-secondary group-hover:text-emerald-800'}`}>{account.type} Account</div>
-          <div className="text-sm font-medium text-apex-text-body">ending in {account.number.slice(-4)}</div>
+          <div className={`text-base font-semibold ${isChecking ? 'text-apex-secondary group-hover:text-apex-primary' : 'text-apex-secondary group-hover:text-emerald-800'}`}>{account.accountType} Account</div>
+          <div className="text-sm font-medium text-apex-text-body">ending in {last4}</div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-apex-secondary">${account.balance.toLocaleString()}</div>
-          <div className="text-sm font-medium text-apex-text-body">{account.type === 'Checking' ? 'Available' : 'Balance'}</div>
+          <div className="text-lg font-bold text-apex-secondary">${account.balance?.toLocaleString()}</div>
+          <div className="text-sm font-medium text-apex-text-body">{isChecking ? 'Available' : 'Balance'}</div>
         </div>
       </div>
       <div className="flex-shrink-0 text-gray-400 p-1">

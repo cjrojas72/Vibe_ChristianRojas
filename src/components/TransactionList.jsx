@@ -19,16 +19,25 @@ export default function TransactionList({ transactions }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {transactions.map(txn => (
-            <tr key={txn.id} className="hover:bg-gray-50 transition">
-              <td className="px-4 py-2 text-sm text-gray-900">{txn.date}</td>
-              <td className="px-4 py-2 text-sm text-gray-500 flex items-center">
-                {txn.type === 'Deposit' ? <ArrowDownIcon /> : <ArrowUpIcon />}
-                {txn.type}
-              </td>
-              <td className={`px-4 py-2 text-sm font-medium ${txn.type === 'Deposit' ? 'text-green-600' : 'text-red-600'}`}>${txn.amount}</td>
-            </tr>
-          ))}
+          {transactions.map(txn => {
+            // Support both camelCase and snake_case keys
+            const txnId = txn.txnId ?? txn.txn_id;
+            const createdAt = txn.createdAt ?? txn.created_at;
+            const txnType = txn.txnType ?? txn.txn_type;
+            const amount = txn.amount;
+            const isDeposit = txnType?.toLowerCase() === 'deposit';
+            const key = txnId || `${txn.accountId ?? txn.account_id}-${createdAt}`;
+            return (
+              <tr key={key} className="hover:bg-gray-50 transition">
+                <td className="px-4 py-2 text-sm text-gray-900">{createdAt}</td>
+                <td className="px-4 py-2 text-sm text-gray-500 flex items-center">
+                  {isDeposit ? <ArrowDownIcon /> : <ArrowUpIcon />}
+                  {txnType}
+                </td>
+                <td className={`px-4 py-2 text-sm font-medium ${isDeposit ? 'text-green-600' : 'text-red-600'}`}>${amount}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

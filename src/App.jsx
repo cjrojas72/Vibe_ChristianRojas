@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -13,7 +12,7 @@ import EmployeeAccountTransactions from './pages/EmployeeAccountTransactions';
 function ProtectedRoute({ children, role }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
-  if (role && user.role !== role) return <Navigate to="/login" />;
+  if (role && user.role?.toLowerCase() !== role.toLowerCase()) return <Navigate to="/login" />;
   return children;
 }
 

@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockApi } from '../api/mockApi';
+import { getTransactions } from '../api/service';
 import TransactionList from '../components/TransactionList';
 
 export default function EmployeeAccountTransactions() {
   const { accountId } = useParams();
   const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    mockApi.getTransactions(accountId).then(setTransactions);
+    setLoading(true);
+    setError('');
+    getTransactions(accountId)
+      .then(setTransactions)
+      .catch(e => setError(e.message || 'Failed to load transactions'))
+      .finally(() => setLoading(false));
   }, [accountId]);
 
   return (
@@ -24,7 +31,9 @@ export default function EmployeeAccountTransactions() {
         </button>
         <h2 className="text-2xl font-bold text-blue-900 mb-4">Account Transactions</h2>
         <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4">
-          <TransactionList transactions={transactions} />
+          {loading && <div className="text-gray-500">Loading...</div>}
+          {error && <div className="text-red-600 mb-2">{error}</div>}
+          {!loading && !error && <TransactionList transactions={transactions} />}
         </div>
       </div>
     </div>

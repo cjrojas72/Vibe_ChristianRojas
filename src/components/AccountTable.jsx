@@ -26,12 +26,12 @@ export default function AccountTable({ accounts }) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {accounts.map(acc => (
-            <tr key={acc.id} className="hover:bg-gray-50 transition">
-              <td className="px-4 py-2 text-sm text-gray-900">{acc.number}</td>
-              <td className="px-4 py-2 text-sm text-gray-500">{acc.type}</td>
+            <tr key={acc.accountId} className="hover:bg-gray-50 transition">
+              <td className="px-4 py-2 text-sm text-gray-900">{acc.accountId}</td>
+              <td className="px-4 py-2 text-sm text-gray-500">{acc.accountType}</td>
               <td className="px-4 py-2 text-sm text-gray-900">${acc.balance}</td>
               <td className="px-4 py-2 text-right flex gap-2 justify-end items-center">
-                <button className="flex items-center text-xs text-blue-700 hover:underline px-2 py-1" onClick={() => navigate(`/employee/accounts/${acc.id}/transactions`)}><EyeIcon />View Transactions</button>
+                <button className="flex items-center text-xs text-blue-700 hover:underline px-2 py-1" onClick={() => navigate(`/employee/accounts/${acc.accountId}/transactions`)}><EyeIcon />View Transactions</button>
                 <button className="flex items-center text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg px-3 py-1 font-medium" title="Edit"><PencilIcon />Edit</button>
                 <button className="flex items-center text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded-lg px-3 py-1 font-medium" title="Delete"><TrashIcon />Delete</button>
               </td>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { mockApi } from '../api/mockApi';
+import { getUserAccounts } from '../api/service';
 import AccountCard from '../components/AccountCard';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,11 +8,17 @@ import SignOutButton from '../components/SignOutButton';
 export default function CustomerHome() {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      mockApi.getAccounts(user.id).then(setAccounts);
+      setLoading(true);
+      getUserAccounts(user.id)
+        .then(setAccounts)
+        .catch(e => setError(e.message || 'Failed to load accounts'))
+        .finally(() => setLoading(false));
     }
   }, [user]);
 
@@ -58,16 +64,11 @@ export default function CustomerHome() {
               {accounts.length} {accounts.length === 1 ? 'Account' : 'Accounts'}
             </div>
           </div>
-          <div className="divide-y divide-gray-200">
-            {accounts.map(acc => (
-              <AccountCard key={acc.id} account={acc} onClick={() => navigate(`/customer/accounts/${acc.id}`)} />
-            ))}
-          </div>
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <button className="w-full text-center py-2.5 bg-blue-700 text-white text-sm font-semibold rounded-xl hover:bg-blue-800 transition duration-150">
-              View All Account Details
-            </button>
-          </div>
+          {loading && <div className="text-gray-500">Loading...</div>}
+          {error && <div className="text-red-600 mb-2">{error}</div>}
+          {!loading && !error && accounts.map(acc => (
+            <AccountCard key={acc.accountId} account={acc} onClick={() => navigate(`/customer/accounts/${acc.accountId}`)} />
+          ))}
         </div>
       </div>
     </div>

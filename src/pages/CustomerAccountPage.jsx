@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockApi } from '../api/mockApi';
+import { getAccount, getTransactions, deposit, withdraw } from '../api/service';
 import TransactionList from '../components/TransactionList';
 import DepositWithdrawForm from '../components/DepositWithdrawForm';
 
@@ -12,10 +12,28 @@ export default function CustomerAccountPage() {
   const [formType, setFormType] = useState('deposit');
   const [message, setMessage] = useState('');
   const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const acc = await getAccount(accountId);
+      setAccount(acc);
+      const txns = await getTransactions(accountId);
+      setTransactions(txns);
+      console.log(txns);
+    } catch (e) {
+      setError(e.message || 'Failed to load account');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    mockApi.getTransactions(accountId).then(setTransactions);
-    mockApi.getAccounts('user1').then(accs => setAccount(accs.find(a => a.id === accountId)));
+    fetchData();
+    // eslint-disable-next-line
   }, [accountId]);
 
   const handleAction = (type) => {
@@ -24,13 +42,19 @@ export default function CustomerAccountPage() {
   };
 
   const handleSubmit = async (amount) => {
-    let res;
-    if (formType === 'deposit') res = await mockApi.deposit(accountId, amount);
-    else res = await mockApi.withdraw(accountId, amount);
-    if (res.success) setMessage('Success!');
-    else setMessage(res.error || 'Error');
-    setShowForm(false);
-    mockApi.getTransactions(accountId).then(setTransactions);
+    try {
+      if (formType === 'deposit') {
+        await deposit(accountId, amount);
+        setMessage('Deposit successful');
+      } else {
+        await withdraw(accountId, amount);
+        setMessage('Withdrawal successful');
+      }
+      setShowForm(false);
+      await fetchData();
+    } catch (e) {
+      setMessage(e.message || 'Error');
+    }
   };
 
   return (
@@ -49,15 +73,17 @@ export default function CustomerAccountPage() {
           </button>
         </div>
         {/* Account Card Header */}
-        {account && (
+        {loading && <div className="text-gray-500">Loading...</div>}
+        {error && <div className="text-red-600 mb-2">{error}</div>}
+        {account && !loading && !error && (
           <div className="w-full max-w-[500px] mx-auto bg-white rounded-3xl p-6 shadow-md border border-gray-200 mb-6">
             <div className="flex items-center justify-between mb-2">
               <div>
-                <div className="text-lg font-bold text-blue-900">{account.type} Account</div>
-                <div className="text-sm font-medium text-gray-500">ending in {account.number.slice(-4)}</div>
+                <div className="text-lg font-bold text-blue-900">{account.accountType} Account</div>
+                <div className="text-sm font-medium text-gray-500">ending in {String(account.accountId).slice(-4)}</div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-blue-900">${account.balance.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-blue-900">${account.balance?.toLocaleString()}</div>
                 <div className="text-sm font-medium text-gray-500">Available</div>
               </div>
             </div>

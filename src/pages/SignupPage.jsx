@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockApi } from '../api/mockApi';
+import { signup } from '../api/auth';
 
 const roles = ['Customer', 'Employee'];
 
@@ -15,12 +15,13 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      await mockApi.signup({ name, email, password, role });
+      await signup({ name, email, password, role });
       setSuccess('Signup successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError('Signup failed');
+      setError(err.message || 'Signup failed');
     }
   };
 

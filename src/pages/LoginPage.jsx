@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockApi } from '../api/mockApi';
+import { login as loginApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 
 const roles = ['Customer', 'Employee'];
@@ -15,13 +15,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const user = await mockApi.login(email, password, role);
+      const user = await loginApi(email, password, role);
       login(user);
-      if (role === 'Customer') navigate('/customer/home');
+      if (role.toLowerCase() === 'customer') navigate('/customer/home');
       else navigate('/employee/home');
     } catch (err) {
-      setError('Login failed');
+      setError(err.message || 'Login failed');
     }
   };
 
