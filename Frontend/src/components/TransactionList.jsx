@@ -20,13 +20,14 @@ export default function TransactionList({ transactions }) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {transactions.map(txn => {
-            // Support both camelCase and snake_case keys
-            const txnId = txn.txnId ?? txn.txn_id;
-            const createdAt = txn.createdAt ?? txn.created_at;
-            const txnType = txn.txnType ?? txn.txn_type;
+            // Support both camelCase and snake_case keys for MongoDB
+            const txnId = txn.txnId || txn.txn_id || txn._id;
+            const createdAt = txn.createdAt || txn.created_at;
+            const txnType = txn.txnType || txn.txn_type;
             const amount = txn.amount;
             const isDeposit = txnType?.toLowerCase() === 'deposit';
-            const key = txnId || `${txn.accountId ?? txn.account_id}-${createdAt}`;
+            const accountId = txn.accountId || txn.account_id;
+            const key = txnId || `${accountId}-${createdAt}`;
             return (
               <tr key={key} className="hover:bg-gray-50 transition">
                 <td className="px-4 py-2 text-sm text-gray-900">{createdAt}</td>

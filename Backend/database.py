@@ -1,7 +1,10 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from pymongo import MongoClient
 
-DATABASE_URL = "mysql+pymysql://root:asdX4601@localhost:3306/employee_db"
+# MongoDB connection
+client = MongoClient("mongodb://localhost:27017/")
+db = client["bankDB"]
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+users_col = db["users"]
+accounts_col = db["accounts"]
+transactions_col = db["transactions"]
+employees_col = db["employees"]

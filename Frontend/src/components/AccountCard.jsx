@@ -18,8 +18,8 @@ const ChevronRight = () => (
 );
 
 export default function AccountCard({ account, onClick }) {
-  const isChecking = account.accountType?.toLowerCase() === 'checking';
-  const last4 = String(account.accountId).slice(-4);
+  const isChecking = (account.accountType || account.account_type)?.toLowerCase() === 'checking';
+  const last4 = String(account.accountId || account.account_id).slice(-4);
   return (
     <div
       className="py-3.5 flex items-center gap-4 group cursor-pointer transition duration-150 divide-y-0"
@@ -30,7 +30,7 @@ export default function AccountCard({ account, onClick }) {
       </div>
       <div className="flex-grow flex items-center justify-between">
         <div>
-          <div className={`text-base font-semibold ${isChecking ? 'text-apex-secondary group-hover:text-apex-primary' : 'text-apex-secondary group-hover:text-emerald-800'}`}>{account.accountType} Account</div>
+          <div className={`text-base font-semibold ${isChecking ? 'text-apex-secondary group-hover:text-apex-primary' : 'text-apex-secondary group-hover:text-emerald-800'}`}>{account.accountType || account.account_type} Account</div>
           <div className="text-sm font-medium text-apex-text-body">ending in {last4}</div>
         </div>
         <div className="text-right">

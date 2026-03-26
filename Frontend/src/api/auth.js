@@ -7,10 +7,11 @@ const mockCustomers = [
   { id: 2, name: 'Bob Lee', email: 'bob@bank.com', role: 'customer' },
 ];
 
+
+// No need to map email, use real email from backend
 export function mapEmployeeToLogin(employee) {
   return {
     ...employee,
-    email: employee.name.toLowerCase().replace(/\s+/g, '') + '@bank.com',
     role: 'employee',
   };
 }
@@ -18,24 +19,21 @@ export function mapEmployeeToLogin(employee) {
 export async function login(email, password, role) {
   if (role.toLowerCase() === 'employee') {
     const employees = await getEmployees();
-    const mapped = employees.map(mapEmployeeToLogin);
-    const found = mapped.find(e => e.email.toLowerCase() === email.toLowerCase());
+    const found = employees.find(e => e.email && e.email.toLowerCase() === email.toLowerCase());
     if (!found) throw new Error('Employee not found');
-    return found;
+    return { ...found, role: 'employee' };
   } else {
-    // Use getUser API to find customer by email
-    // Since backend only supports lookup by userId, simulate by trying ids 1-20
-    for (let id = 1; id <= 20; id++) {
-      try {
-        const user = await getUser(id);
-        if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
-          return { ...user, role: 'customer' };
-        }
-      } catch (e) {
-        // ignore not found
-      }
-    }
-    throw new Error('User not found');
+    // Use new backend /login route for customer
+    const res = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    // Fetch user details by id
+    const user = await getUser(data.user_id);
+    return { ...user, role: 'customer' };
   }
 }
 

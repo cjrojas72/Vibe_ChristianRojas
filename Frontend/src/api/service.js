@@ -1,23 +1,27 @@
 // src/api/service.js
 const BASE_URL = "http://localhost:5000";
 
+
+// Map MongoDB API account object to frontend format
 function mapAccount(apiAccount) {
   return {
-    accountId: apiAccount.account_id,
-    userId: apiAccount.user_id,
+    accountId: apiAccount.account_id || apiAccount._id || apiAccount.accountId,
+    userId: apiAccount.user_id || apiAccount.userId,
     balance: apiAccount.balance,
-    accountType: apiAccount.account_type,
-    createdAt: apiAccount.created_at,
+    accountType: apiAccount.account_type || apiAccount.accountType,
+    createdAt: apiAccount.created_at || apiAccount.createdAt,
   };
 }
 
+
+// Map MongoDB API transaction object to frontend format
 function mapTransaction(apiTxn) {
   return {
-    txnId: apiTxn.txn_id,
-    accountId: apiTxn.account_id,
-    txnType: apiTxn.txn_type,
+    txnId: apiTxn.txn_id || apiTxn._id || apiTxn.txnId,
+    accountId: apiTxn.account_id || apiTxn.accountId,
+    txnType: apiTxn.txn_type || apiTxn.txnType,
     amount: apiTxn.amount,
-    createdAt: apiTxn.created_at,
+    createdAt: apiTxn.created_at || apiTxn.createdAt,
   };
 }
 
@@ -114,6 +118,7 @@ export async function getTransactions(accountId) {
   }
 }
 
+
 export async function getUserAccounts(userId) {
   try {
     const res = await fetch(`${BASE_URL}/api/users/${userId}/accounts`);
@@ -129,9 +134,10 @@ export async function getUser(userId) {
   try {
     const res = await fetch(`${BASE_URL}/api/users/${userId}`);
     const data = await res.json();
+    console.log(data);
     if (!res.ok) throw new Error(data.error || "User not found");
     return {
-      id: data.user_id,
+      id: data.user_id || data._id || data.id,
       name: data.name,
       email: data.email,
     };
@@ -157,7 +163,7 @@ export async function getAllUsers() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to fetch users");
     return Array.isArray(data)
-      ? data.map(u => ({ id: u.user_id, name: u.name, email: u.email }))
+      ? data.map(u => ({ id: u.user_id || u._id || u.id, name: u.name, email: u.email }))
       : [];
   } catch (err) {
     throw err;

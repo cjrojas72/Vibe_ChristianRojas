@@ -1,34 +1,43 @@
 from flask import Blueprint, request, jsonify
-from repository import get_all_employees, create_employee, createAccount, getAccount, deposit, withdraw, getTransactions
-from sqlalchemy.exc import SQLAlchemyError
+from repository import get_all_employees, create_employee, createAccount, getAccount, deposit, withdraw, getTransactions, getAllUsers, getUserById, getAccountsByUser
+from bson import ObjectId
 
 routes = Blueprint('routes', __name__)
+
+
+
+@routes.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    if not email or not password:
+        return jsonify({'error': 'Missing email or password'}), 400
+    # For demo: password is not checked, only email is used to find user
+    from database import users_col
+    user = users_col.find_one({'email': email})
+    if not user:
+        return jsonify({'error': 'Invalid credentials'}), 401
+    # In production, check hashed password here
+    return jsonify({'user_id': str(user['_id'])})
 
 @routes.route("/employees", methods=["GET"])
 def get_employees():
     employees = get_all_employees()
-    return jsonify([{
-        "id": e.id,
-        "name": e.name,
-        "department": e.department,
-        "salary": float(e.salary)
-    } for e in employees])
+    return jsonify(employees)
+
 
 @routes.route("/employees", methods=["POST"])
 def add_employee():
-    try:
-        data = request.get_json()
-        name = data.get("name")
-        department = data.get("department")
-        salary = data.get("salary")
-        if not name or not department or not salary:
-            return jsonify({"error": "Missing required fields"}), 400
-        emp = create_employee(name, department, salary)
-        return jsonify({"id": emp.id}), 201
-    except ValueError as ve:
-        return jsonify({"error": str(ve)}), 400
-    except SQLAlchemyError as e:
-        return jsonify({"error": "Database error", "details": str(e)}), 500
+    data = request.get_json()
+    name = data.get("name")
+    department = data.get("department")
+    salary = data.get("salary")
+    if not name or not department or not salary:
+        return jsonify({"error": "Missing required fields"}), 400
+    emp = create_employee(name, department, salary)
+    return jsonify({"id": str(emp["_id"])}), 201
+
 
 @routes.route('/api/accounts', methods=['POST'])
 def api_create_account():
@@ -41,39 +50,41 @@ def api_create_account():
     return jsonify(account), 201
 
 
+
 # Route to get all users
 @routes.route('/api/users', methods=['GET'])
 def api_get_all_users():
-    from repository import getAllUsers  # Import here to avoid circular import if any
     users = getAllUsers()
     return jsonify(users)
 
+
 # Route to get all accounts for a user
-@routes.route('/api/users/<int:user_id>/accounts', methods=['GET'])
+@routes.route('/api/users/<user_id>/accounts', methods=['GET'])
 def api_get_user_accounts(user_id):
-    from repository import getAccountsByUser  # Import here to avoid circular import if any
     accounts = getAccountsByUser(user_id)
     if accounts is None:
         return jsonify({"error": "User not found or no accounts"}), 404
     return jsonify(accounts)
 
+
 # Route to get user information
-@routes.route('/api/users/<int:user_id>', methods=['GET'])
+@routes.route('/api/users/<user_id>', methods=['GET'])
 def api_get_user(user_id):
-    from repository import getUserById  # Import here to avoid circular import if any
     user = getUserById(user_id)
     if user is None:
         return jsonify({"error": "User not found"}), 404
     return jsonify(user)
 
-@routes.route('/api/accounts/<int:account_id>', methods=['GET'])
+
+@routes.route('/api/accounts/<account_id>', methods=['GET'])
 def api_get_account(account_id):
     account = getAccount(account_id)
     if not account:
         return jsonify({"error": "Account not found"}), 404
     return jsonify(account)
 
-@routes.route('/api/accounts/<int:account_id>/deposit', methods=['POST'])
+
+@routes.route('/api/accounts/<account_id>/deposit', methods=['POST'])
 def api_deposit(account_id):
     data = request.get_json()
     amount = float(data.get("amount"))
@@ -84,7 +95,8 @@ def api_deposit(account_id):
         return jsonify({"error": "Account not found"}), 404
     return jsonify(account)
 
-@routes.route('/api/accounts/<int:account_id>/withdraw', methods=['POST'])
+
+@routes.route('/api/accounts/<account_id>/withdraw', methods=['POST'])
 def api_withdraw(account_id):
     data = request.get_json()
     amount = float(data.get("amount"))
@@ -95,7 +107,8 @@ def api_withdraw(account_id):
         return jsonify({"error": "Insufficient funds or account not found"}), 400
     return jsonify(account)
 
-@routes.route('/api/accounts/<int:account_id>/transactions', methods=['GET'])
+
+@routes.route('/api/accounts/<account_id>/transactions', methods=['GET'])
 def api_transactions(account_id):
     txns = getTransactions(account_id)
     return jsonify(txns)

@@ -4,6 +4,7 @@ import { getTransactions } from '../api/service';
 import TransactionList from '../components/TransactionList';
 
 export default function EmployeeAccountTransactions() {
+  // Support both accountId and account_id from params (MongoDB string)
   const { accountId } = useParams();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);

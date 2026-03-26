@@ -5,6 +5,7 @@ import TransactionList from '../components/TransactionList';
 import DepositWithdrawForm from '../components/DepositWithdrawForm';
 
 export default function CustomerAccountPage() {
+  // Support both accountId and account_id from params (MongoDB string)
   const { accountId } = useParams();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
