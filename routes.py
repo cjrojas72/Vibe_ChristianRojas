@@ -40,6 +40,32 @@ def api_create_account():
     account = createAccount(user_id, account_type)
     return jsonify(account), 201
 
+
+# Route to get all users
+@routes.route('/api/users', methods=['GET'])
+def api_get_all_users():
+    from repository import getAllUsers  # Import here to avoid circular import if any
+    users = getAllUsers()
+    return jsonify(users)
+
+# Route to get all accounts for a user
+@routes.route('/api/users/<int:user_id>/accounts', methods=['GET'])
+def api_get_user_accounts(user_id):
+    from repository import getAccountsByUser  # Import here to avoid circular import if any
+    accounts = getAccountsByUser(user_id)
+    if accounts is None:
+        return jsonify({"error": "User not found or no accounts"}), 404
+    return jsonify(accounts)
+
+# Route to get user information
+@routes.route('/api/users/<int:user_id>', methods=['GET'])
+def api_get_user(user_id):
+    from repository import getUserById  # Import here to avoid circular import if any
+    user = getUserById(user_id)
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify(user)
+
 @routes.route('/api/accounts/<int:account_id>', methods=['GET'])
 def api_get_account(account_id):
     account = getAccount(account_id)
@@ -50,7 +76,7 @@ def api_get_account(account_id):
 @routes.route('/api/accounts/<int:account_id>/deposit', methods=['POST'])
 def api_deposit(account_id):
     data = request.get_json()
-    amount = data.get("amount")
+    amount = float(data.get("amount"))
     if amount is None or amount <= 0:
         return jsonify({"error": "Invalid amount"}), 400
     account = deposit(account_id, amount)
@@ -61,7 +87,7 @@ def api_deposit(account_id):
 @routes.route('/api/accounts/<int:account_id>/withdraw', methods=['POST'])
 def api_withdraw(account_id):
     data = request.get_json()
-    amount = data.get("amount")
+    amount = float(data.get("amount"))
     if amount is None or amount <= 0:
         return jsonify({"error": "Invalid amount"}), 400
     account = withdraw(account_id, amount)

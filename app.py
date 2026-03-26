@@ -25,8 +25,6 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 CORS(app)
 
-# API Routes
-
 # Register routes from routes.py
 from routes import routes as routes_blueprint
 app.register_blueprint(routes_blueprint)

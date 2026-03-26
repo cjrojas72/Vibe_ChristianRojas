@@ -1,3 +1,26 @@
+# Get all users
+def getAllUsers():
+	with SessionLocal() as db:
+		users = db.query(User).all()
+		return [
+			{
+				"user_id": u.user_id,
+				"name": u.name,
+				"email": u.email
+			}
+			for u in users
+		]
+# Get user information by user_id
+def getUserById(user_id):
+	with SessionLocal() as db:
+		user = db.query(User).filter(User.user_id == user_id).first()
+		if not user:
+			return None
+		return {
+			"user_id": user.user_id,
+			"name": user.name,
+			"email": user.email
+		}
 from models import Employee, User, Account, Transaction
 from database import SessionLocal
 from sqlalchemy.exc import SQLAlchemyError
@@ -59,7 +82,8 @@ def deposit(accountId, amount):
 			account = db.query(Account).filter(Account.account_id == accountId).first()
 			if not account:
 				return None
-			account.balance += float(amount)
+			from decimal import Decimal
+			account.balance += Decimal(str(amount))
 			txn = Transaction(
 				account_id=accountId,
 				txn_type="deposit",
@@ -84,9 +108,10 @@ def withdraw(accountId, amount):
 	try:
 		with SessionLocal() as db:
 			account = db.query(Account).filter(Account.account_id == accountId).first()
-			if not account or account.balance < float(amount):
+			from decimal import Decimal
+			if not account or account.balance < Decimal(str(amount)):
 				return None
-			account.balance -= float(amount)
+			account.balance -= Decimal(str(amount))
 			txn = Transaction(
 				account_id=accountId,
 				txn_type="withdrawal",
@@ -118,4 +143,21 @@ def getTransactions(accountId):
 				"created_at": t.created_at
 			}
 			for t in txns
+		]
+
+# Get all accounts for a user
+def getAccountsByUser(user_id):
+	with SessionLocal() as db:
+		accounts = db.query(Account).filter(Account.user_id == user_id).all()
+		if not accounts:
+			return None
+		return [
+			{
+				"account_id": a.account_id,
+				"user_id": a.user_id,
+				"balance": float(a.balance),
+				"account_type": a.account_type,
+				"created_at": a.created_at
+			}
+			for a in accounts
 		]
