@@ -1,7 +1,7 @@
 // src/api/auth.js
 import { getEmployees, getUser } from './service';
 
-const BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Simulated customer list (for demo, can be replaced with API later)
 // const mockCustomers = [
