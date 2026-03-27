@@ -3,12 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { login as loginApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 
-const roles = ['Customer', 'Employee'];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Customer');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,10 +15,11 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const user = await loginApi(email, password, role);
-      login(user);
-      if (role.toLowerCase() === 'customer') navigate('/customer/home');
-      else navigate('/employee/home');
+      const { user, token } = await loginApi(email, password);
+      login(user, token);
+      // Redirect based on role from backend
+      if (user.role && user.role.toLowerCase() === 'employee') navigate('/employee/home');
+      else navigate('/customer/home');
     } catch (err) {
       setError(err.message || 'Login failed');
     }
@@ -36,10 +35,7 @@ export default function LoginPage() {
             <input id="email" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="input mb-2 w-full border border-gray-300 rounded-md p-2" required />
             <label htmlFor="password">Password</label>
             <input id="password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="input mb-2 w-full border border-gray-300 rounded-md p-2" required />
-            <label htmlFor="role">Role</label>
-            <select id="role" value={role} onChange={e => setRole(e.target.value)} className="input mb-4 w-full border border-gray-300 rounded-md p-2">
-            {roles.map(r => <option key={r}>{r}</option>)}
-            </select>
+            {/* Role selection removed; role is now determined by backend/JWT */}
         </div>
         <button type="submit" className="btn w-full btn-primary">Login</button>
         <div className="mt-2 text-sm">Don't have an account? <a href="/signup" className="text-blue-700">Sign up</a></div>

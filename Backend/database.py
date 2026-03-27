@@ -1,7 +1,9 @@
+import os
 from pymongo import MongoClient
 
-# MongoDB connection
-client = MongoClient("mongodb://localhost:27017/")
+# Get MongoDB URI from environment variable, fallback to localhost for dev
+MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
+client = MongoClient(MONGODB_URI)
 db = client["bankDB"]
 
 users_col = db["users"]

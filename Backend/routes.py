@@ -1,3 +1,6 @@
+import jwt
+import datetime
+from flask import current_app
 from flask import Blueprint, request, jsonify
 from repository import get_all_employees, create_employee, createAccount, getAccount, deposit, withdraw, getTransactions, getAllUsers, getUserById, getAccountsByUser
 from bson import ObjectId
@@ -13,13 +16,21 @@ def login():
     password = data.get('password')
     if not email or not password:
         return jsonify({'error': 'Missing email or password'}), 400
-    # For demo: password is not checked, only email is used to find user
     from database import users_col
     user = users_col.find_one({'email': email})
-    if not user:
+    if not user or 'password' not in user or user['password'] != password:
         return jsonify({'error': 'Invalid credentials'}), 401
     # In production, check hashed password here
-    return jsonify({'user_id': str(user['_id'])})
+    user_id = str(user['_id'])
+    user_role = user.get('role', 'customer')
+    payload = {
+        'user_id': user_id,
+        'role': user_role,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+    }
+    secret = current_app.config.get('JWT_SECRET', 'dev_secret')
+    token = jwt.encode(payload, secret, algorithm='HS256')
+    return jsonify({'user_id': user_id, 'role': user_role, 'token': token})
 
 @routes.route("/employees", methods=["GET"])
 def get_employees():

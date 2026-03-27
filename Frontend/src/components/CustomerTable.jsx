@@ -13,6 +13,10 @@ const EyeIcon = () => (
 
 export default function CustomerTable({ customers }) {
   const navigate = useNavigate();
+  // Only show customers that are not employees (assume a 'role' property or filter by email/other property if needed)
+  const filteredCustomers = customers.filter(
+    cust => !cust.role || cust.role === 'customer' // adjust this filter as needed
+  );
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4">
       <table className="min-w-full divide-y divide-gray-200">
@@ -24,7 +28,7 @@ export default function CustomerTable({ customers }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {customers.map(cust => (
+          {filteredCustomers.map(cust => (
             <tr key={cust.id} className="hover:bg-gray-50 transition">
               <td className="px-4 py-2 text-sm text-gray-900">{cust.name}</td>
               <td className="px-4 py-2 text-sm text-gray-500">{cust.email}</td>

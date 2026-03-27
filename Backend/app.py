@@ -22,14 +22,23 @@ from flask import Flask, request, jsonify
 # 	{"txn_id": 4, "account_id": 3, "txn_type": "deposit", "amount": 500.00, "created_at": "2026-03-03 09:20:00"},
 # ]
 
+
 app = Flask(__name__)
-CORS(app)
+# Enable CORS for all origins, all headers, all methods, and credentials (for debugging)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True,
+    allow_headers="*",
+    expose_headers="*",
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+)
 
 # Register routes from routes.py
 from routes import routes as routes_blueprint
 app.register_blueprint(routes_blueprint)
+print(app.url_map)
 
 if __name__ == '__main__':
-    # Enable CORS if needed
-    CORS(app)
     app.run(debug=True)
+    

@@ -140,6 +140,7 @@ export async function getUser(userId) {
       id: data.user_id || data._id || data.id,
       name: data.name,
       email: data.email,
+      role: data.role,
     };
   } catch (err) {
     throw err;
@@ -163,7 +164,11 @@ export async function getAllUsers() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to fetch users");
     return Array.isArray(data)
-      ? data.map(u => ({ id: u.user_id || u._id || u.id, name: u.name, email: u.email }))
+      ? data.map(u => ({ 
+          id: u.user_id || u._id || u.id, 
+          name: u.name, 
+          email: u.email, 
+          role: u.role }))
       : [];
   } catch (err) {
     throw err;

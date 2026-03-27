@@ -10,7 +10,8 @@ def getAllUsers():
         {
             "user_id": str(u["_id"]),
             "name": u["name"],
-            "email": u["email"]
+            "email": u["email"],
+            "role": u["role"],
         }
         for u in users
     ]

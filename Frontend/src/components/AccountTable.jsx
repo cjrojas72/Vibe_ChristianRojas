@@ -13,6 +13,12 @@ const EyeIcon = () => (
 
 export default function AccountTable({ accounts }) {
   const navigate = useNavigate();
+  // Only show accounts that are not for employees (assume employee accounts have a role property or are not in users)
+  // If accounts have a 'role' or 'isEmployee' property, filter here. Otherwise, this will show all accounts passed in.
+  // If you want to filter by a list of customer IDs, pass only customer accounts from the parent.
+  const filteredAccounts = accounts.filter(
+    acc => !acc.role || acc.role === 'customer' // adjust this filter as needed
+  );
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-4">
       <table className="min-w-full divide-y divide-gray-200">
@@ -25,7 +31,7 @@ export default function AccountTable({ accounts }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {accounts.map(acc => {
+          {filteredAccounts.map(acc => {
             const accountId = acc.accountId || acc.account_id;
             const accountType = acc.accountType || acc.account_type;
             return (

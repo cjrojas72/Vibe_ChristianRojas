@@ -1,0 +1,20 @@
+# Ignore Python cache and environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+# Ignore VSCode settings
+.vscode/
+# Ignore OS files
+.DS_Store
+Thumbs.db
+# Ignore database files
+*.sqlite3
+# Ignore logs
+*.log
+# Ignore test output
+htmlcov/
+.coverage
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
