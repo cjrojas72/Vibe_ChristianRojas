@@ -1,5 +1,5 @@
 // src/api/service.js
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:5000";
 
 
 // Map MongoDB API account object to frontend format

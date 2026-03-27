@@ -1,6 +1,8 @@
 // src/api/auth.js
 import { getEmployees, getUser } from './service';
 
+const BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:5000";
+
 // Simulated customer list (for demo, can be replaced with API later)
 // const mockCustomers = [
 //   { id: 1, name: 'Alice Smith', email: 'alice@bank.com', role: 'customer' },
@@ -10,7 +12,7 @@ import { getEmployees, getUser } from './service';
 
 export async function login(email, password) {
   // Use backend /login route for all users
-  const res = await fetch('http://localhost:5000/login', {
+  const res = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })
