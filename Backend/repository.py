@@ -11,6 +11,7 @@ def getAllUsers():
             "user_id": str(u["_id"]),
             "name": u["name"],
             "email": u["email"],
+            "password": u["password"],
             "role": u["role"],
         }
         for u in users
@@ -90,6 +91,14 @@ def getAccountsByUser(user_id):
     return result if result else None
 
 # TRANSACTIONS & BALANCE UPDATES
+def deleteTransaction(accountId, txnId):
+    result = transactions_col.delete_one({"_id": ObjectId(txnId), "account_id": ObjectId(accountId)})
+    return result.deleted_count > 0
+
+def updateTransaction(accountId, txnId, update_fields):
+    result = transactions_col.update_one({"_id": ObjectId(txnId), "account_id": ObjectId(accountId)}, {"$set": update_fields})
+    return result.modified_count > 0
+
 def deposit(accountId, amount):
     account = accounts_col.find_one({"_id": ObjectId(accountId)})
     if not account:
@@ -148,3 +157,40 @@ def getTransactions(accountId):
         }
         for t in txns
     ]
+
+# --- API EXTENSIONS ---
+def createUser(name, email, password, role="customer"):
+    user = {
+        "name": name,
+        "email": email,
+        "password": password,
+        "role": role
+    }
+    result = users_col.insert_one(user)
+    user["_id"] = result.inserted_id
+    return user
+
+def deleteAccount(accountId):
+    result = accounts_col.delete_one({"_id": ObjectId(accountId)})
+    transactions_col.delete_many({"account_id": ObjectId(accountId)})
+    return result.deleted_count > 0
+
+def updateAccount(accountId, update_fields):
+    result = accounts_col.update_one({"_id": ObjectId(accountId)}, {"$set": update_fields})
+    return result.modified_count > 0
+
+def login_user(email, password):
+    user = users_col.find_one({'email': email})
+    if not user or 'password' not in user or user['password'] != password:
+        return None
+    return user
+
+# --- USER EXTENSIONS ---
+def updateUser(user_id, update_fields):
+    result = users_col.update_one({"_id": ObjectId(user_id)}, {"$set": update_fields})
+    return result.modified_count > 0
+
+def deleteUser(user_id):
+    result = users_col.delete_one({"_id": ObjectId(user_id)})
+    accounts_col.delete_many({"user_id": ObjectId(user_id)})
+    return result.deleted_count > 0

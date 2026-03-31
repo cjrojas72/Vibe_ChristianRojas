@@ -134,13 +134,13 @@ export async function getUser(userId) {
   try {
     const res = await fetch(`${BASE_URL}/api/users/${userId}`);
     const data = await res.json();
-    console.log(data);
     if (!res.ok) throw new Error(data.error || "User not found");
     return {
       id: data.user_id || data._id || data.id,
       name: data.name,
       email: data.email,
       role: data.role,
+      password: data.password
     };
   } catch (err) {
     throw err;
@@ -168,8 +168,116 @@ export async function getAllUsers() {
           id: u.user_id || u._id || u.id, 
           name: u.name, 
           email: u.email, 
-          role: u.role }))
+          password: u.password,
+          role: u.role,
+       }))
       : [];
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Create a new user
+export async function createUser({ name, email, password, role = "customer" }) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password, role }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to create user");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Delete an account
+export async function deleteAccount(accountId) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/accounts/${accountId}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to delete account");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Update an account
+export async function updateAccount(accountId, updateFields) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/accounts/${accountId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateFields),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update account");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Delete a transaction
+export async function deleteTransaction(accountId, transactionId) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/accounts/${accountId}/transactions/${transactionId}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to delete transaction");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Update a transaction
+export async function updateTransaction(accountId, transactionId, updateFields) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/accounts/${accountId}/transactions/${transactionId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateFields),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update transaction");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Update a user
+export async function updateUser(userId, updateFields) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updateFields),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to update user");
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Delete a user
+export async function deleteUser(userId) {
+  try {
+    const res = await fetch(`${BASE_URL}/api/users/${userId}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to delete user");
+    return data;
   } catch (err) {
     throw err;
   }

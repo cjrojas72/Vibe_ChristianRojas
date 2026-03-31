@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getAllUsers, getEmployees } from '../api/service';
+import { getAllUsers, getEmployees, createUser } from '../api/service';
+import EditModal from '../components/EditModal';
 import CustomerTable from '../components/CustomerTable';
 import EmployeeProfileCard from '../components/EmployeeProfileCard';
 import SignOutButton from '../components/SignOutButton';
@@ -12,8 +13,11 @@ export default function EmployeeHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [addUserLoading, setAddUserLoading] = useState(false);
+  const [addUserError, setAddUserError] = useState('');
 
-  useEffect(() => {
+  const fetchData = () => {
     setLoading(true);
     setError('');
     Promise.all([
@@ -31,6 +35,10 @@ export default function EmployeeHome() {
       })
       .catch(e => setError(e.message || 'Failed to load data'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [user]);
 
   return (
@@ -38,13 +46,59 @@ export default function EmployeeHome() {
       <div className="max-w-[1280px] xl:max-w-[70vw] mx-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-blue-900">All Customers</h2>
-          <SignOutButton />
+          <div className="flex gap-2 items-center">
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowAddUser(true)}
+            >
+              Add User
+            </button>
+            <SignOutButton />
+          </div>
         </div>
         {/* Employee Profile Card */}
         {employee && <EmployeeProfileCard employee={employee} />}
         {loading && <div className="text-gray-500">Loading...</div>}
         {error && <div className="text-red-600 mb-2">{error}</div>}
-        {!loading && !error && <CustomerTable customers={customers} />}
+        {!loading && !error && (
+          <CustomerTable
+            customers={customers}
+            loading={loading}
+            onRefresh={fetchData}
+          />
+        )}
+        {showAddUser && (
+          <EditModal
+            title="Add User"
+            fields={[
+              { name: 'name', label: 'Name', required: true },
+              { name: 'email', label: 'Email', type: 'email', required: true },
+              { name: 'password', label: 'Password', type: 'password', required: true },
+              { name: 'role', label: 'Role', options: [
+                  { value: 'customer', label: 'Customer' },
+                  { value: 'employee', label: 'Employee' }
+                ], required: true },
+            ]}
+            initialValues={{ role: 'customer' }}
+            onSubmit={async (values) => {
+              setAddUserLoading(true);
+              setAddUserError('');
+              try {
+                await createUser(values);
+                setShowAddUser(false);
+                fetchData();
+              } catch (e) {
+                setAddUserError(e.message || 'Failed to add user');
+              } finally {
+                setAddUserLoading(false);
+              }
+            }}
+            onClose={() => setShowAddUser(false)}
+          >
+            {addUserError && <div className="text-red-600 mb-2">{addUserError}</div>}
+            {addUserLoading && <div className="text-gray-500">Adding user...</div>}
+          </EditModal>
+        )}
       </div>
     </div>
   );

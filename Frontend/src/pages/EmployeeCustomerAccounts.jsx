@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getUserAccounts, getUser } from '../api/service';
+import { getUserAccounts, getUser, createAccount } from '../api/service';
+import EditModal from '../components/EditModal';
 import AccountTable from '../components/AccountTable';
 
 export default function EmployeeCustomerAccounts() {
@@ -10,8 +11,11 @@ export default function EmployeeCustomerAccounts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [showAddAccount, setShowAddAccount] = useState(false);
+  const [addAccountLoading, setAddAccountLoading] = useState(false);
+  const [addAccountError, setAddAccountError] = useState('');
 
-  useEffect(() => {
+  const fetchData = () => {
     setLoading(true);
     setError('');
     Promise.all([
@@ -24,6 +28,10 @@ export default function EmployeeCustomerAccounts() {
       })
       .catch(e => setError(e.message || 'Failed to load customer accounts'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [customerId]);
 
   return (
@@ -36,11 +44,54 @@ export default function EmployeeCustomerAccounts() {
           <svg className="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" /></svg>
           Back
         </button>
-        <h2 className="text-2xl font-bold text-blue-900 mb-2">Customer Accounts</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-2xl font-bold text-blue-900">Customer Accounts</h2>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowAddAccount(true)}
+          >
+            Add Account
+          </button>
+        </div>
         {customer && <div className="mb-4 text-lg text-gray-700">{customer.name} ({customer.email})</div>}
         {loading && <div className="text-gray-500">Loading...</div>}
         {error && <div className="text-red-600 mb-2">{error}</div>}
-        {!loading && !error && <AccountTable accounts={accounts} />}
+        {!loading && !error && (
+          <AccountTable
+            accounts={accounts}
+            loading={loading}
+            onRefresh={fetchData}
+          />
+        )}
+        {showAddAccount && (
+          <EditModal
+            title="Add Account"
+            fields={[
+              { name: 'account_type', label: 'Type', options: [
+                  { value: 'checking', label: 'Checking' },
+                  { value: 'savings', label: 'Savings' }
+                ], required: true },
+            ]}
+            initialValues={{ account_type: '', balance: 0 }}
+            onSubmit={async (values) => {
+              setAddAccountLoading(true);
+              setAddAccountError('');
+              try {
+                await createAccount(customerId, values.account_type);
+                setShowAddAccount(false);
+                fetchData();
+              } catch (e) {
+                setAddAccountError(e.message || 'Failed to add account');
+              } finally {
+                setAddAccountLoading(false);
+              }
+            }}
+            onClose={() => setShowAddAccount(false)}
+          >
+            {addAccountError && <div className="text-red-600 mb-2">{addAccountError}</div>}
+            {addAccountLoading && <div className="text-gray-500">Adding account...</div>}
+          </EditModal>
+        )}
       </div>
     </div>
   );
