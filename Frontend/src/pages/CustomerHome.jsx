@@ -65,7 +65,7 @@ export default function CustomerHome() {
             </div>
           </div>
           {loading && <div className="text-gray-500">Loading...</div>}
-          {error && <div className="text-red-600 mb-2">{error}</div>}
+          {error && <div className="text-red-600 mb-2">No Accounts Found. Please talk with an advisor for assistance.</div>}
           {!loading && !error && accounts.map(acc => (
             <AccountCard key={acc.accountId || acc.account_id} account={acc} onClick={() => navigate(`/customer/accounts/${acc.accountId || acc.account_id}`)} />
           ))}

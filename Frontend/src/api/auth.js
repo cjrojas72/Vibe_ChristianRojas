@@ -1,5 +1,5 @@
 // src/api/auth.js
-import { getEmployees, getUser } from './service';
+import { getEmployees, getUser, createUser } from './service';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -25,10 +25,11 @@ export async function login(email, password) {
   return { user: { ...user, role: data.role }, token: data.token };
 }
 
-export async function signup({ name, email, password, role }) {
+export async function signup({ name, email, password }) {
   // Only allow customer signup for now
-  if (role.toLowerCase() !== 'customer') throw new Error('Only customer signup supported');
+  const role = 'customer';
   // In real app, call API to create user
   // For now, do nothing and simulate success
+  await createUser({ name, email, password, role });
   return true;
 }

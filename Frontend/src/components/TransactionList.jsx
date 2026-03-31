@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatDate } from '../utils/formatDate';
 
 const ArrowDownIcon = () => (
   <svg className="w-4 h-4 mr-1 inline-block text-green-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14m0 0l-6-6m6 6l6-6" /></svg>
@@ -30,7 +31,7 @@ export default function TransactionList({ transactions }) {
             const key = txnId || `${accountId}-${createdAt}`;
             return (
               <tr key={key} className="hover:bg-gray-50 transition">
-                <td className="px-4 py-2 text-sm text-gray-900">{createdAt}</td>
+                <td className="px-4 py-2 text-sm text-gray-900">{formatDate(createdAt)}</td>
                 <td className="px-4 py-2 text-sm text-gray-500 flex items-center">
                   {isDeposit ? <ArrowDownIcon /> : <ArrowUpIcon />}
                   {txnType}

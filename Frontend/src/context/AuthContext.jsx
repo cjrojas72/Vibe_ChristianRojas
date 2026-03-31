@@ -4,15 +4,25 @@ const AuthContext = createContext();
 
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(null);
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('jwt_token') && !!localStorage.getItem('user');
+  });
+  const [role, setRole] = useState(() => {
+    const stored = localStorage.getItem('role');
+    return stored ? stored : null;
+  });
   const [token, setToken] = useState(() => localStorage.getItem('jwt_token') || null);
 
   const login = (userData, jwtToken) => {
     setUser(userData);
     setIsAuthenticated(true);
     setRole(userData.role);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('role', userData.role || '');
     if (jwtToken) {
       setToken(jwtToken);
       localStorage.setItem('jwt_token', jwtToken);
@@ -24,6 +34,8 @@ export function AuthProvider({ children }) {
     setRole(null);
     setToken(null);
     localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
   };
 
   // Helper to get token for API requests

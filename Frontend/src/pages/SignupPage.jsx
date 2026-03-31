@@ -17,7 +17,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError('');
     try {
-      await signup({ name, email, password, role });
+      await signup({ name, email, password });
       setSuccess('Signup successful! Redirecting to login...');
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
@@ -38,10 +38,10 @@ export default function SignupPage() {
           <input id="email" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="input mb-2 w-full border border-gray-300 rounded-md p-2" required />
           <label htmlFor="password">Password</label>
           <input id="password" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="input mb-2 w-full border border-gray-300 rounded-md p-2" required />
-          <label htmlFor="role">Role</label>
+          {/* <label htmlFor="role">Role</label>
           <select id="role" value={role} onChange={e => setRole(e.target.value)} className="input mb-4 w-full border border-gray-300 rounded-md p-2">
             {roles.map(r => <option key={r}>{r}</option>)}
-          </select>
+          </select> */}
         </div>
         <button type="submit" className="btn w-full btn-primary">Sign Up</button>
         <div className="mt-2 text-sm">Already have an account? <a href="/login" className="text-blue-700">Login</a></div>
